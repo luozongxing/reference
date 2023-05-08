@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试</title>
+</head>
+<body>
+{% block test %}
+<form action="{{ url_for('uploadfile') }}" method="post" enctype="multipart/form-data">
+     {{ form.csrf_token }}
+    {{ form.file }}{{ form.submit }}
+
+</form>
+
+<form action="{{ url_for('downloadfile') }}" method="post">
+    {{ download_form.submit}}
+
+</form>
+
+{% endblock %}
+</body>
+</html>
