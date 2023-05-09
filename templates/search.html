@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Search Sub Table</title>
+</head>
+<body>
+<h1>主表查询关键字</h1>
+<form method="POST">
+    {{ form.csrf_token }}
+    {{ form.main_content.label }} {{ form.main_content }}
+    {{ form.submit() }}
+</form>
+
+<br>
+<br>
+{% if sub_contents %}
+    <h2>子表返回主表关键字查询相关内容如下：</h2>
+    <ul>
+        {% for sub in sub_contents %}
+            <li>{{ sub.sub_content }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+</body>
+</html>

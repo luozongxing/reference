@@ -5,7 +5,7 @@ from flask_wtf.file import FileRequired, FileField, FileAllowed
 from sqlalchemy import text
 from flask_wtf import FlaskForm
 import wtforms
-from wtforms import SubmitField
+from wtforms import SubmitField, StringField
 from wtforms.validators import Email, Length, EqualTo, InputRequired, DataRequired
 from flask_migrate import Migrate
 app = Flask(__name__)
@@ -22,6 +22,7 @@ app.config[
 app.config['SECRET_KEY'] = 'replace_with_your_secret_key'
 import os
 app.config['SECRET_KEY'] = os.urandom(24)
+app.debug=True
 # 在app.config中设置好连接数据库的信息
 # 然后使用SQLAlchemy(app)创建一个db对象
 # SQLAlchemy会自动读取app.config中的数据库的信息
@@ -79,6 +80,20 @@ article = Article(title="Flask学习大纲", content="Flaskxxxxx")
 #     db.create_all()
 
 
+class MainTable(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    main_content = db.Column(db.String(50), nullable=False)
+    sub_contents = db.relationship('SubTable', backref='main_table', lazy=True)
+
+class SubTable(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sub_content = db.Column(db.String(50), nullable=False)
+    main_id = db.Column(db.Integer, db.ForeignKey('main_table.id'), nullable=False)
+
+class MainTableForm(FlaskForm):
+    main_content = StringField('请输入查询内容', validators=[DataRequired()])
+    submit = SubmitField('查询')
+
 class Download(FlaskForm):
 
     submit = SubmitField(label='下载')
@@ -89,6 +104,20 @@ class UploadForm(FlaskForm):
 
     file = FileField('File', validators=[DataRequired(), FileAllowed(['xls', 'xlsx'], message='只能上传xls和xlsx格式的文件，其他文件不支持')])
     submit = SubmitField('上传')
+
+
+
+@app.route('/', methods=['GET', 'POST'])
+def search_sub_table():
+    form = MainTableForm()
+    if form.validate_on_submit():
+        main_content = form.main_content.data
+        sub_contents = SubTable.query.filter(SubTable.sub_content.like(f'%{main_content}%')).all()
+        print(sub_contents)
+        return render_template('search.html', sub_contents=sub_contents, form=form)  # 提供form变量
+    return render_template('search.html', form=form)  # 提供form变量
+
+
 
 
 
